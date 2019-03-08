@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="css/style.css">
+	<title>Basket</title>
+</head>
+<body>
+	<div class="wraper">
+		<h3>Кофе из Эфиопии</h3>
+		<div class="product_box">
+			<h3 class="product_title">Харар</h3>
+			<p>Цена: <span class="product_price">449</span> руб.</p>
+			<button class="add_basket" data-id="7">Добавить в корзину</button>
+		</div>
+		<div class="product_box">
+			<h3 class="product_title">Сидамо</h3>
+			<p>Цена: <span class="product_price">599</span> руб.</p>
+			<button class="add_basket" data-id="2">Добавить в корзину</button>
+		</div>
+		<div class="product_box">
+			<h3 class="product_title">Иргачеффе</h3>
+			<p>Цена: <span class="product_price">659</span> руб.</p>
+			<button class="add_basket" data-id="5">Добавить в корзину</button>
+		</div>
+		<button id="checkout">Оформить заказ</button>
+		<button id="clear_cart">Очистить корзину</button>
+		<div id="basket"></div>
+	</div>
+
+	<script>
+		var doc = document,
+		productBox = doc.querySelectorAll('.product_box'), 
+		basket = doc.getElementById('basket'); 
+
+		function addEvent(elem, type, handler){
+			if(elem.addEventListener){
+			elem.addEventListener(type, handler, false);
+			} else {
+ 			elem.attachEvent('on'+type, function(){ handler.call( elem ); });
+			}
+			return false;
+		}
+
+		function getCartData(){
+			return JSON.parse(localStorage.getItem('cart'));
+		}
+
+		function setCartData(o){
+			localStorage.setItem('cart', JSON.stringify(o));
+			return false;
+		}
+
+		function addToCart(e){
+			
+			var cartData = getCartData() || {}, 
+			parentBox = this.parentNode, 
+			itemId = this.getAttribute('data-id'), 
+			itemTitle = parentBox.querySelector('.product_title').innerHTML, 
+			itemPrice = parentBox.querySelector('.product_price').innerHTML; 
+
+			if (cartData.hasOwnProperty(itemId)) { 
+			cartData[itemId][2] += 1;
+			} else { 
+			    cartData[itemId] = [itemTitle, itemPrice, 1];
+			}
+
+			cartData[itemId][3] = cartData[itemId][1] * cartData[itemId][2];
+
+			if(!setCartData(cartData)) { 
+				this.disabled = false; 
+			}
+			return false;
+		}
+
+
+		for (var i = 0; i < productBox.length; i++) {
+		addEvent(productBox[i].querySelector('.add_basket'), 'click', addToCart);
+		}
+
+
+		function openCart(e) {
+	 		var cartData = getCartData(), 
+			totalItems = '',
+			sumBasket = 0;
+
+			
+			if(cartData !== null){
+	 		totalItems = '<table class="shopping_list"><tr><th>Наименование</th><th>Цена</th><th>Кол-во</th><th>Итого</th></tr>';
+				for (var items in cartData) {
+					totalItems += '<tr>';
+					for (var i = 0; i < cartData[items].length; i++) {
+					totalItems += '<td>' + cartData[items][i] + '</td>';
+					}
+					totalItems += '</tr>';
+					sumBasket += cartData[items][3];
+					//console.log(cartData[items].length);
+				}
+
+				totalItems += '</table>';
+				basket.innerHTML = totalItems;
+				basket.innerHTML = totalItems + '<span> Итого к оплате: ' + sumBasket + ' руб.</span>';
+			} else {
+	    
+			basket.innerHTML = 'В корзине пусто!';
+			}
+			return false;
+		}
+
+		
+		addEvent(doc.getElementById('checkout'), 'click', openCart);
+
+		addEvent(doc.getElementById('clear_cart'), 'click', function(e){
+			localStorage.removeItem('cart');
+			basket.innerHTML = 'Корзина очишена.';
+		});
+
+
+
+	</script>
+</body>
+</html>
